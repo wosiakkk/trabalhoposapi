@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,9 +21,13 @@ import br.com.trabalhorazer.api.model.Produto;
 import br.com.trabalhorazer.api.repository.ClienteRepository;
 import br.com.trabalhorazer.api.repository.PedidoRepository;
 import br.com.trabalhorazer.api.repository.ProdutoRepository;
+import br.com.trabalhorazer.api.response.Response;
+import br.com.trabalhorazer.api.service.ClienteServicesImp;
+import br.com.trabalhorazer.api.service.PedidoServices;
+import br.com.trabalhorazer.api.service.ProdutoServicesImp;
 
 @RestController
-@RequestMapping("/pedido")
+@RequestMapping("/pedidos")
 public class PedidoController {
 	
 	@Autowired
@@ -33,39 +36,55 @@ public class PedidoController {
 	private ProdutoRepository produtoRepository;
 	@Autowired
 	private ClienteRepository clienteRepository;
+
+	@Autowired
+	private ClienteServicesImp clienteServices;
+	@Autowired
+	private ProdutoServicesImp produtoServices;
+	@Autowired
+	private PedidoServices pedidoServices;
+	@Autowired
+	private Response<Pedido> response;
+	@Autowired
+	private Response<List<Pedido>> responseList;
 	
 	@PostMapping(value = "/", produces = "application/json")
-	private ResponseEntity<Pedido> salvar(@RequestBody List<PedidoDTO> listaItensPedido){
+	private ResponseEntity<Response<Pedido>> salvar(@RequestBody List<PedidoDTO> listaItensPedido){
 		Cliente cliente = null;
 		Pedido pedido = new Pedido();
 		List<ItemDoPedido> itens = new ArrayList<>();
 		for(PedidoDTO item : listaItensPedido) {
 			if(cliente == null) {
-				cliente = clienteRepository.findByCpf(item.getCpfCliente());
+				cliente = clienteServices.buscarPorCpf(item.getCpfCliente());
 				pedido.setCliente(cliente);
 				Calendar c = Calendar.getInstance();
 				Date data = c.getTime();
 				pedido.setData(data);
-				pedido = pedidoRepository.save(pedido);
+				pedido = pedidoServices.salvar(pedido);
 			}
-			
-			Optional<Produto> produtoOptional =  produtoRepository.findById(Long.parseLong(item.getIdProduto()));
+			Produto produtoItem = produtoServices.buscar(Long.parseLong(item.getIdProduto()));
 			Long quantidade = Long.parseLong(item.getQuantidade());
-			ItemDoPedido itemNovo = new ItemDoPedido(quantidade,pedido,produtoOptional.get());
+			ItemDoPedido itemNovo = new ItemDoPedido(quantidade,pedido,produtoItem);
 			itens.add(itemNovo);
 		}
 		pedido.setItens(itens);
-		pedido = pedidoRepository.save(pedido);
-		return new ResponseEntity<Pedido>(pedido, HttpStatus.CREATED);
+		pedido = pedidoServices.salvar(pedido);
+		response.setData(pedido);
+		return ResponseEntity.ok().body(response);
 	}
 	
 	@PostMapping(value = "/listar", produces = "application/json")
-	private ResponseEntity<List<Pedido>> listarPedidos(@RequestBody Cliente cpf){
+	private ResponseEntity<Response<List<Pedido>>> listarPedidos(@RequestBody Cliente cliente){
 		List<Pedido> lista = new ArrayList<>();
-		lista = pedidoRepository.findByCpf(cpf.getCpf());
-		if(lista.isEmpty())
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-		return new ResponseEntity<List<Pedido>>(lista, HttpStatus.OK);
+		try {
+			lista = pedidoServices.listarPedidosPorCpf(cliente);
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseList.getErros().add(e.getMessage());
+			return ResponseEntity.badRequest().body(responseList);
+		}
+		responseList.setData(lista);
+		return ResponseEntity.ok().body(responseList);
 	}
 
 }

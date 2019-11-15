@@ -2,7 +2,6 @@ package br.com.trabalhorazer.api.controller;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -22,7 +21,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import br.com.trabalhorazer.api.excepetion.ServicesExceptions;
 import br.com.trabalhorazer.api.model.Produto;
-import br.com.trabalhorazer.api.repository.ProdutoRepository;
 import br.com.trabalhorazer.api.response.Response;
 import br.com.trabalhorazer.api.service.ProdutoServicesImp;
 
@@ -30,8 +28,6 @@ import br.com.trabalhorazer.api.service.ProdutoServicesImp;
 @RequestMapping(value = "/produtos")
 public class ProdutoController {
 	
-	@Autowired
-	private ProdutoRepository produtoRepository;
 	@Autowired
 	private ProdutoServicesImp produtoService;
 	@Autowired

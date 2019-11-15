@@ -64,4 +64,15 @@ public class ClienteServicesImp implements Services<Cliente>{
 			throw new ServicesExceptions("Problemas ao excluir o Cliente");
 		}
 	}
+	
+	public Cliente buscarPorCpf(String cpf) {
+		Cliente busca;
+		try {
+			busca =  clienteRepository.findByCpf(cpf);
+			return busca;
+		} catch (ServicesExceptions e) {
+			throw new ServicesExceptions("Cliente não encontrado");
+		}
+	}
+	
 }

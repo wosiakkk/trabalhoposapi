@@ -13,8 +13,14 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.NotNull;
+
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.stereotype.Component;
 
 @Entity
+@Component
+@Table(value = "pedido")
 public class Pedido implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
@@ -27,7 +33,8 @@ public class Pedido implements Serializable {
 	@JoinColumn(name = "id_cliente")
 	private Cliente cliente;
 	
-	@Column(nullable = false)
+	@Column
+	@NotNull(message = "A Data não pode ser nula!")
 	private Date data;
 	
 	@OneToMany(mappedBy = "pedido", orphanRemoval = true, cascade = CascadeType.ALL)
