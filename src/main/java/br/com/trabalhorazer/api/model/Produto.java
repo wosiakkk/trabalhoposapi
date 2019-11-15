@@ -6,8 +6,15 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.stereotype.Component;
 
 @Entity
+@Component
+@Table(value = "produto")
 public class Produto implements Serializable{
 
 	private static final long serialVersionUID = 1L;
@@ -16,8 +23,11 @@ public class Produto implements Serializable{
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
-	@Column(nullable = false)
+	@Column
+	@NotNull(message = "A descrição do produto não pode ser nula!")
+	@NotBlank(message = "A descrição do produto deve ser preenchida!")
 	private String descricao;
+	
 	public Long getId() {
 		return id;
 	}

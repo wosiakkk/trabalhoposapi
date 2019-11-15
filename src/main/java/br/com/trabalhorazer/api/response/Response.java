@@ -3,6 +3,9 @@ package br.com.trabalhorazer.api.response;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class Response<T> {
 
 	private T data;

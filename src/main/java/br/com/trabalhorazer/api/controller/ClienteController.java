@@ -3,8 +3,6 @@ package br.com.trabalhorazer.api.controller;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -22,23 +20,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import br.com.trabalhorazer.api.excepetion.ServicesExceptions;
 import br.com.trabalhorazer.api.model.Cliente;
-import br.com.trabalhorazer.api.repository.ClienteRepository;
 import br.com.trabalhorazer.api.response.Response;
-import br.com.trabalhorazer.api.service.ClienteService;
+import br.com.trabalhorazer.api.service.ClienteServicesImp;
 
 @RestController
-@RequestMapping(value = "/cliente")
+@RequestMapping(value = "/clientes")
 public class ClienteController {
 	
 	@Autowired
-	private ClienteRepository clienteRepository;
+	private ClienteServicesImp clienteService;
 	@Autowired
-	private ClienteService clienteService;
+	private Response<Cliente> response;
+	@Autowired
+	private Response<List<Cliente>> responseList;
+	
 	
 	@PostMapping(value = "/", produces = "application/json")
 	private ResponseEntity<Response<Cliente>> salvar(@Valid @RequestBody Cliente novoCliente, BindingResult results){
-		Response<Cliente> response = new Response<Cliente>();
 		if(results.hasErrors()) { //validação
 			results.getAllErrors().forEach(error -> response.getErros().add(error.getDefaultMessage()));
 			return ResponseEntity.badRequest().body(response);
@@ -50,77 +50,77 @@ public class ClienteController {
 		return ResponseEntity.created(location).body(response);
 	}
 	
-	@PutMapping(value = "/{id}", produces = "application/json")
-	private ResponseEntity<Cliente> atualizar(@PathVariable(value = "id")Long id,
-											  @RequestBody Cliente editado){
-		
+	@GetMapping(value = "/", produces = "application/json")
+	private ResponseEntity<Response<List<Cliente>>> listarClientes(){
+		List<Cliente> clientes = new ArrayList<>();
 		try {
-			Optional<Cliente> busca = clienteRepository.findById(id);
-			if(busca.get()!=null) {
-				editado.setId(busca.get().getId());
-				try {
-					editado = clienteRepository.save(editado);
-					return new ResponseEntity<Cliente>(editado, HttpStatus.CREATED);
-				} catch (Exception e) {
-					e.printStackTrace();
-					return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-				}
-			}else {
-				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-			}
-		} catch (NoSuchElementException e) {
+			clientes = clienteService.listar();
+		} catch (ServicesExceptions e) {
 			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+			responseList.getErros().add(e.getMessage());
+			return ResponseEntity.badRequest().body(responseList);
 		}
+		responseList.setData(clientes);
+		return ResponseEntity.ok().body(responseList);
+		
+	}
+	
+	@PutMapping(value = "/{id}", produces = "application/json")
+	private ResponseEntity<Response<Cliente>> atualizar(@Valid @PathVariable(value = "id")Long id,
+											  @RequestBody Cliente editado, BindingResult results){
+		if(results.hasErrors()) {
+			results.getAllErrors().forEach(error -> response.getErros().add(error.getDefaultMessage()));
+			return ResponseEntity.badRequest().body(response);
+		}
+		Cliente	busca;
+		try {
+			 busca = clienteService.buscar(id);
+		} catch (ServicesExceptions e) {
+			e.printStackTrace();
+			response.setData(new Cliente());
+			response.getErros().add(e.getMessage());
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+		}
+		editado.setId(busca.getId());
+		editado = clienteService.atualizar(editado);
+		response.setData(editado);
+		return ResponseEntity.ok().body(response);
 	}
 	
 	@GetMapping(value = "/{id}", produces = "application/json")
-	private ResponseEntity<Cliente> pesquisar(@PathVariable(value = "id")Long id){
-		
+	private ResponseEntity<Response<Cliente>> pesquisar(@PathVariable(value = "id")Long id){
 		try {
-			Optional<Cliente> pesquisado = clienteRepository.findById(id);
-			if(pesquisado.get()!=null) {
-				return new ResponseEntity<Cliente>(pesquisado.get(), HttpStatus.OK);
-			}else {
-				return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
-			}
-		} catch (Exception e) {
+			Cliente	busca = clienteService.buscar(id);
+			response.setData(busca);
+			return ResponseEntity.ok().body(response);
+		} catch (ServicesExceptions e) {
 			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+			response.setData(new Cliente());
+			response.getErros().add(e.getMessage());
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
 		}
 	}
 	
 	@DeleteMapping(value = "/{id}")
-	private ResponseEntity<Cliente> deletar(@PathVariable(value = "id")Long id){
+	private ResponseEntity<Response<List<Cliente>>> deletar(@PathVariable(value = "id")Long id){
+		Cliente buscar;
 		try {
-			Optional<Cliente> busca = clienteRepository.findById(id);
-			if(busca.get()!=null) {
-				try {
-					clienteRepository.delete(busca.get());
-					return ResponseEntity.status(HttpStatus.OK).body(null);
-				} catch (Exception e) {
-					e.printStackTrace();
-					return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-				}
-			}else {
-				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-			}
-		} catch (Exception e) {
+			buscar = clienteService.buscar(id);
+		} catch (ServicesExceptions e) {
 			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+			responseList.setData(clienteService.listar());
+			responseList.getErros().add(e.getMessage());
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseList);
 		}
-	}
-	
-	@GetMapping(value = "/", produces = "application/json")
-	private ResponseEntity<List<Cliente>> listarClientes(){
-		List<Cliente> clientes = new ArrayList<>();
 		try {
-			Iterable<Cliente> lista = clienteRepository.findAll();
-			lista.forEach(c -> clientes.add(c));
-			return new ResponseEntity<List<Cliente>>(clientes,HttpStatus.OK);
-		} catch (Exception e) {
+			clienteService.excluir(buscar);
+			responseList.setData(clienteService.listar());
+			return ResponseEntity.ok().body(responseList);
+		} catch (ServicesExceptions e) {
 			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+			responseList.setData(clienteService.listar());
+			responseList.getErros().add(e.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseList);	
 		}
 	}
 	

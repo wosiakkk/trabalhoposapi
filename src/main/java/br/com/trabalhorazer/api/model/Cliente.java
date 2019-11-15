@@ -25,16 +25,18 @@ public class Cliente implements Serializable{
 	private Long id;
 	
 	@Column
-	@NotNull(message = "O campo CPF deve ser preenchido!")
+	@NotNull(message = "O campo CPF não pode ser nulo!")
 	@NotBlank(message = "O campo CPF deve ser preenchido!")
 	private String cpf;
 	
 	@Column
-	@NotNull(message = "O campo Nome deves ser preenchido!")
+	@NotNull(message = "O campo Nome não pode ser nulo!")
+	@NotBlank(message = "O campo Nome deve ser preenchido!")
 	private String nome;
 	
 	@Column
-	@NotNull(message = "O campo Sobrenome deves ser preenchido!")
+	@NotNull(message = "O campo Sobrenome não pode ser nulo!")
+	@NotBlank(message = "O campo Sobrenome deve ser preenchido!")
 	private String sobrenome;
 
 	
