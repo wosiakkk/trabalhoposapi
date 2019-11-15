@@ -1,4 +1,4 @@
-package br.com.trabalhorazerapi.dto;
+package br.com.trabalhorazer.api.dto;
 
 import java.util.List;
 

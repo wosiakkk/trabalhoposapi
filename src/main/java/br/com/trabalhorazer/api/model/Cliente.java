@@ -7,8 +7,15 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.stereotype.Component;
 
 @Entity
+@Component
+@Table(value = "cliente")
 public class Cliente implements Serializable{
 
 	private static final long serialVersionUID = 1L;
@@ -17,13 +24,17 @@ public class Cliente implements Serializable{
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
-	@Column(nullable = false)
+	@Column
+	@NotNull(message = "O campo CPF deve ser preenchido!")
+	@NotBlank(message = "O campo CPF deve ser preenchido!")
 	private String cpf;
 	
-	@Column(nullable = false)
+	@Column
+	@NotNull(message = "O campo Nome deves ser preenchido!")
 	private String nome;
 	
-	@Column(nullable = false)
+	@Column
+	@NotNull(message = "O campo Sobrenome deves ser preenchido!")
 	private String sobrenome;
 
 	

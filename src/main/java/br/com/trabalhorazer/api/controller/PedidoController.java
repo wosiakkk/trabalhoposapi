@@ -9,13 +9,12 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.trabalhorazer.api.dto.PedidoDTO;
 import br.com.trabalhorazer.api.model.Cliente;
 import br.com.trabalhorazer.api.model.ItemDoPedido;
 import br.com.trabalhorazer.api.model.Pedido;
@@ -23,7 +22,6 @@ import br.com.trabalhorazer.api.model.Produto;
 import br.com.trabalhorazer.api.repository.ClienteRepository;
 import br.com.trabalhorazer.api.repository.PedidoRepository;
 import br.com.trabalhorazer.api.repository.ProdutoRepository;
-import br.com.trabalhorazerapi.dto.PedidoDTO;
 
 @RestController
 @RequestMapping("/pedido")
@@ -67,7 +65,6 @@ public class PedidoController {
 		lista = pedidoRepository.findByCpf(cpf.getCpf());
 		if(lista.isEmpty())
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-		
 		return new ResponseEntity<List<Pedido>>(lista, HttpStatus.OK);
 	}
 
