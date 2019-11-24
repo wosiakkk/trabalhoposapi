@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,9 +17,6 @@ import br.com.trabalhorazer.api.model.Cliente;
 import br.com.trabalhorazer.api.model.ItemDoPedido;
 import br.com.trabalhorazer.api.model.Pedido;
 import br.com.trabalhorazer.api.model.Produto;
-import br.com.trabalhorazer.api.repository.ClienteRepository;
-import br.com.trabalhorazer.api.repository.PedidoRepository;
-import br.com.trabalhorazer.api.repository.ProdutoRepository;
 import br.com.trabalhorazer.api.response.Response;
 import br.com.trabalhorazer.api.service.ClienteServicesImp;
 import br.com.trabalhorazer.api.service.PedidoServices;
@@ -30,13 +26,6 @@ import br.com.trabalhorazer.api.service.ProdutoServicesImp;
 @RequestMapping("/pedidos")
 public class PedidoController {
 	
-	@Autowired
-	private PedidoRepository pedidoRepository;
-	@Autowired
-	private ProdutoRepository produtoRepository;
-	@Autowired
-	private ClienteRepository clienteRepository;
-
 	@Autowired
 	private ClienteServicesImp clienteServices;
 	@Autowired
